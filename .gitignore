@@ -1,0 +1,10 @@
+# Build
+/target/
+
+# Local tooling
+CLAUDE.md
+.claude/
+docs/superpowers/
+
+# OS
+.DS_Store
