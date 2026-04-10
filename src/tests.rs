@@ -1,4 +1,6 @@
 use super::*;
+use sha2::{Digest, Sha256};
+
 const FAIR_PICK_VECTORS: &str = include_str!("../vendor/wallop/spec/vectors/fair-pick.json");
 
 fn seed_from_hex(hex_str: &str) -> [u8; 32] {
@@ -258,7 +260,23 @@ fn shared_vectors() {
             })
             .collect();
 
-        let seed = seed_from_hex(v["seed_hex"].as_str().unwrap());
+        let seed_hex = v["seed_hex"].as_str().unwrap();
+        let seed = seed_from_hex(seed_hex);
+
+        // Supply-chain integrity: if seed_note exists, verify SHA-256(inner) == seed_hex
+        if let Some(note) = v.get("seed_note").and_then(|n| n.as_str()) {
+            let inner = note
+                .strip_prefix("SHA-256(\"")
+                .and_then(|s| s.strip_suffix("\")"))
+                .unwrap_or_else(|| panic!("malformed seed_note in vector {}: {note}", v["name"]));
+            let hash = Sha256::digest(inner.as_bytes());
+            assert_eq!(
+                hex::encode(hash),
+                seed_hex.to_ascii_lowercase(),
+                "seed_note/seed_hex mismatch in vector {}",
+                v["name"]
+            );
+        }
 
         let count = v["winner_count"].as_u64().unwrap() as u32;
         let expected: Vec<&str> = v["expected_winners"]
