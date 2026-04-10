@@ -1,12 +1,10 @@
 use super::*;
+use sha2::{Digest, Sha256};
+
+const FAIR_PICK_VECTORS: &str = include_str!("../vendor/wallop/spec/vectors/fair-pick.json");
 
 fn seed_from_hex(hex_str: &str) -> [u8; 32] {
-    let mut bytes = [0u8; 32];
-    for (i, chunk) in hex_str.as_bytes().chunks(2).enumerate() {
-        let s = std::str::from_utf8(chunk).unwrap();
-        bytes[i] = u8::from_str_radix(s, 16).unwrap();
-    }
-    bytes
+    hex::decode(hex_str).unwrap().try_into().unwrap()
 }
 
 // --- Algorithm vector A-1: minimal draw ---
@@ -217,4 +215,43 @@ fn duplicate_ids_returns_error() {
     ];
     let result = draw(&entries, &[0u8; 32], 1);
     assert!(result.is_err());
+}
+
+// --- Shared vectors from vendor/wallop/spec/vectors/fair-pick.json ---
+
+#[test]
+fn shared_vectors() {
+    let vectors: serde_json::Value = serde_json::from_str(FAIR_PICK_VECTORS).unwrap();
+
+    for v in vectors["vectors"].as_array().unwrap() {
+        let entries: Vec<Entry> = v["entries"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|e| Entry {
+                id: e["id"].as_str().unwrap().into(),
+                weight: e["weight"].as_u64().unwrap() as u32,
+            })
+            .collect();
+
+        let seed: [u8; 32] = if let Some(hex) = v.get("seed_hex").and_then(|s| s.as_str()) {
+            seed_from_hex(hex)
+        } else {
+            let note = v["seed_note"].as_str().unwrap();
+            let inner = &note[9..note.len() - 2];
+            Sha256::digest(inner.as_bytes()).into()
+        };
+
+        let count = v["winner_count"].as_u64().unwrap() as u32;
+        let expected: Vec<&str> = v["expected_winners"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|w| w.as_str().unwrap())
+            .collect();
+
+        let result = draw(&entries, &seed, count).unwrap();
+        let actual: Vec<&str> = result.iter().map(|w| w.entry_id.as_str()).collect();
+        assert_eq!(actual, expected, "vector: {}", v["name"].as_str().unwrap());
+    }
 }

@@ -20,6 +20,20 @@ block(seed, ctr) = SHA256(seed || BE32(ctr))
 
 where `seed` is the 32-byte draw seed and `ctr` is a monotonically incrementing 32-bit counter encoded as big-endian bytes. Each call to `random_integer(seed, ctr, n)` uses rejection sampling to ensure a perfectly uniform distribution over `[0, n)`: if the 256-bit hash value falls in the rejection region (`value >= floor(2^256 / n) * n`), the counter increments and a new block is drawn. In practice, rejection is rare (< 1 in 2^192 for any realistic `n`).
 
+## Getting started
+
+```bash
+git clone --recursive https://github.com/electric-lump-software/fair_pick_rs.git
+cd fair_pick_rs
+cargo test
+```
+
+If you've already cloned without `--recursive`:
+
+```bash
+git submodule update --init
+```
+
 ## Usage
 
 ```rust
