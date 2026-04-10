@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-04-10
+
+### Fixed
+
+- PRNG counter uses `checked_add` instead of bare `+` for consistent overflow behaviour across build profiles
+- Reject `count == 0` in `draw()` instead of returning an empty result
+
 ## [0.1.2] - 2026-04-10
 
 ### Fixed

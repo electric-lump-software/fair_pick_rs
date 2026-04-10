@@ -19,7 +19,13 @@ pub struct Winner {
 ///
 /// Given a list of entries, a 32-byte seed, and a winner count,
 /// produces an ordered list of winners. Same inputs always produce the same output.
+///
+/// If `count` exceeds the number of unique entry IDs, the result will contain
+/// fewer than `count` winners (one per unique ID, in draw order).
 pub fn draw(entries: &[Entry], seed: &[u8; 32], count: u32) -> Result<Vec<Winner>, String> {
+    if count == 0 {
+        return Err("winner count must be positive".to_string());
+    }
     validate_entries(entries)?;
 
     let pool = expand_pool(entries);
@@ -60,6 +66,9 @@ fn expand_pool(entries: &[Entry]) -> Vec<String> {
 }
 
 /// Durstenfeld (modern Fisher-Yates) shuffle using counter-mode SHA256 PRNG.
+///
+/// Shuffles the entire pool regardless of winner count to ensure deterministic
+/// output — the shuffle order must not depend on how many winners are requested.
 fn shuffle(pool: &[String], seed: &[u8; 32]) -> Vec<String> {
     let mut arr: Vec<String> = pool.to_vec();
     let m = arr.len();

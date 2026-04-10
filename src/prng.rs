@@ -33,10 +33,15 @@ fn do_random_integer(seed: &[u8; 32], ctr: u32, n: u64, limit: &[u8; 32]) -> (u6
     let hash = block(seed, ctr);
 
     if ge_256(&hash, limit) {
-        do_random_integer(seed, ctr + 1, n, limit)
+        do_random_integer(
+            seed,
+            ctr.checked_add(1).expect("PRNG counter exhausted"),
+            n,
+            limit,
+        )
     } else {
         let value = mod_256(&hash, n);
-        (value, ctr + 1)
+        (value, ctr.checked_add(1).expect("PRNG counter exhausted"))
     }
 }
 
