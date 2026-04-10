@@ -216,6 +216,16 @@ fn zero_weight_returns_error() {
 }
 
 #[test]
+fn zero_count_returns_error() {
+    let entries = vec![Entry {
+        id: "a".into(),
+        weight: 1,
+    }];
+    let result = draw(&entries, &[0u8; 32], 0);
+    assert_eq!(result.unwrap_err(), "winner count must be positive");
+}
+
+#[test]
 fn duplicate_ids_returns_error() {
     let entries = vec![
         Entry {
@@ -244,7 +254,7 @@ fn shared_vectors() {
             .iter()
             .map(|e| Entry {
                 id: e["id"].as_str().unwrap().into(),
-                weight: e["weight"].as_u64().unwrap() as u32,
+                weight: e["weight"].as_u64().unwrap().try_into().unwrap(),
             })
             .collect();
 
