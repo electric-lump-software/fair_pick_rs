@@ -1,6 +1,4 @@
 use super::*;
-use sha2::{Digest, Sha256};
-
 const FAIR_PICK_VECTORS: &str = include_str!("../vendor/wallop/spec/vectors/fair-pick.json");
 
 fn seed_from_hex(hex_str: &str) -> [u8; 32] {
@@ -202,6 +200,22 @@ fn empty_entries_returns_error() {
 }
 
 #[test]
+fn zero_weight_returns_error() {
+    let entries = vec![
+        Entry {
+            id: "a".into(),
+            weight: 1,
+        },
+        Entry {
+            id: "b".into(),
+            weight: 0,
+        },
+    ];
+    let result = draw(&entries, &[0u8; 32], 1);
+    assert_eq!(result.unwrap_err(), "entry weight must be positive: b");
+}
+
+#[test]
 fn duplicate_ids_returns_error() {
     let entries = vec![
         Entry {
@@ -234,13 +248,7 @@ fn shared_vectors() {
             })
             .collect();
 
-        let seed: [u8; 32] = if let Some(hex) = v.get("seed_hex").and_then(|s| s.as_str()) {
-            seed_from_hex(hex)
-        } else {
-            let note = v["seed_note"].as_str().unwrap();
-            let inner = &note[9..note.len() - 2];
-            Sha256::digest(inner.as_bytes()).into()
-        };
+        let seed = seed_from_hex(v["seed_hex"].as_str().unwrap());
 
         let count = v["winner_count"].as_u64().unwrap() as u32;
         let expected: Vec<&str> = v["expected_winners"]

@@ -68,7 +68,7 @@ fn shuffle(pool: &[String], seed: &[u8; 32]) -> Vec<String> {
         return arr;
     }
 
-    let mut ctr: u64 = 0;
+    let mut ctr: u32 = 0;
 
     for i in (1..m).rev() {
         let (j, next_ctr) = prng::random_integer(seed, ctr, (i + 1) as u64);
@@ -86,6 +86,9 @@ fn validate_entries(entries: &[Entry]) -> Result<(), String> {
 
     let mut ids = HashSet::new();
     for entry in entries {
+        if entry.weight == 0 {
+            return Err(format!("entry weight must be positive: {}", entry.id));
+        }
         if !ids.insert(&entry.id) {
             return Err("entries must not contain duplicate ids".to_string());
         }

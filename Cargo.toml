@@ -1,9 +1,12 @@
 [package]
 name = "fair_pick_rs"
-version = "0.1.0"
+version = "0.1.2"
 edition = "2024"
 description = "Deterministic, verifiable draw algorithm for provably fair random selection."
 license = "MIT"
+homepage = "https://wallop.run"
+repository = "https://github.com/wallop-app/fair_pick_rs"
+documentation = "https://docs.rs/fair_pick_rs"
 
 [dependencies]
 sha2 = "0.10"

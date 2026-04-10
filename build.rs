@@ -11,5 +11,5 @@ fn main() {
         );
     }
 
-    println!("cargo:rerun-if-changed=vendor/wallop/spec/vectors/");
+    println!("cargo:rerun-if-changed=vendor/wallop/spec/vectors/fair-pick.json");
 }
