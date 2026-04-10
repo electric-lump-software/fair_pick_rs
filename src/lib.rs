@@ -86,6 +86,9 @@ fn validate_entries(entries: &[Entry]) -> Result<(), String> {
 
     let mut ids = HashSet::new();
     for entry in entries {
+        if entry.weight == 0 {
+            return Err(format!("entry weight must be positive: {}", entry.id));
+        }
         if !ids.insert(&entry.id) {
             return Err("entries must not contain duplicate ids".to_string());
         }

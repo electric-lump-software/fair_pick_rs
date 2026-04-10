@@ -202,6 +202,25 @@ fn empty_entries_returns_error() {
 }
 
 #[test]
+fn zero_weight_returns_error() {
+    let entries = vec![
+        Entry {
+            id: "a".into(),
+            weight: 1,
+        },
+        Entry {
+            id: "b".into(),
+            weight: 0,
+        },
+    ];
+    let result = draw(&entries, &[0u8; 32], 1);
+    assert_eq!(
+        result.unwrap_err(),
+        "entry weight must be positive: b"
+    );
+}
+
+#[test]
 fn duplicate_ids_returns_error() {
     let entries = vec![
         Entry {
