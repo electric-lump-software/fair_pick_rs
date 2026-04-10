@@ -68,7 +68,7 @@ fn shuffle(pool: &[String], seed: &[u8; 32]) -> Vec<String> {
         return arr;
     }
 
-    let mut ctr: u64 = 0;
+    let mut ctr: u32 = 0;
 
     for i in (1..m).rev() {
         let (j, next_ctr) = prng::random_integer(seed, ctr, (i + 1) as u64);

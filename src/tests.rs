@@ -214,10 +214,7 @@ fn zero_weight_returns_error() {
         },
     ];
     let result = draw(&entries, &[0u8; 32], 1);
-    assert_eq!(
-        result.unwrap_err(),
-        "entry weight must be positive: b"
-    );
+    assert_eq!(result.unwrap_err(), "entry weight must be positive: b");
 }
 
 #[test]

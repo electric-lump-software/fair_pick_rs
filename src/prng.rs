@@ -3,17 +3,19 @@ use sha2::{Digest, Sha256};
 /// Generate a single 32-byte PRNG block.
 ///
 /// `block(seed, ctr) = SHA256(seed || BE32(ctr))`
-pub fn block(seed: &[u8; 32], ctr: u64) -> [u8; 32] {
+///
+/// The counter is 32-bit to match the Elixir spec: `<<seed::binary, ctr::32-big>>`.
+pub fn block(seed: &[u8; 32], ctr: u32) -> [u8; 32] {
     let mut hasher = Sha256::new();
     hasher.update(seed);
-    hasher.update((ctr as u32).to_be_bytes());
+    hasher.update(ctr.to_be_bytes());
     hasher.finalize().into()
 }
 
 /// Generate a uniform random integer in [0, n) using rejection sampling.
 ///
 /// Returns `(value, next_counter)`.
-pub fn random_integer(seed: &[u8; 32], ctr: u64, n: u64) -> (u64, u64) {
+pub fn random_integer(seed: &[u8; 32], ctr: u32, n: u64) -> (u64, u32) {
     // We need 256-bit arithmetic for the rejection sampling limit.
     // 2^256 / n * n is the limit; values >= limit are rejected.
     //
@@ -27,7 +29,7 @@ pub fn random_integer(seed: &[u8; 32], ctr: u64, n: u64) -> (u64, u64) {
     do_random_integer(seed, ctr, n, &limit)
 }
 
-fn do_random_integer(seed: &[u8; 32], ctr: u64, n: u64, limit: &[u8; 32]) -> (u64, u64) {
+fn do_random_integer(seed: &[u8; 32], ctr: u32, n: u64, limit: &[u8; 32]) -> (u64, u32) {
     let hash = block(seed, ctr);
 
     if ge_256(&hash, limit) {
